@@ -4,5 +4,8 @@
   :license "MIT License"
   :serial t
   :depends-on (:cl-ppcre)
-  :components ((:file "package")
-               (:file "clscript")))
+  :in-order-to ((asdf:test-op (asdf:test-op :clscript-test)))
+  :components ((:module "src"
+                        :components
+                        ((:file "package")
+                         (:file "clscript")))))
