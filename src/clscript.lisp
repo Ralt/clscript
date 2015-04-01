@@ -12,7 +12,7 @@
     (loop
        :do
        (cond
-         ((= (length remaining) 0) (return-from tokenize (reverse tokens)))
+         ((= (length remaining) 0) (return-from tokenize tokens))
 
          ;; new expression
          ((string= +token-left-paren+ (subseq remaining 0 1))
@@ -43,3 +43,27 @@
                  (atom (subseq remaining 0 end)))
             (setf remaining (subseq remaining end))
             (push atom tokens)))))))
+
+(defun read-from-tokens (tokens)
+  (let ((token (vector-pop tokens)))
+    (cond
+      ((string= token +token-left-paren+)
+       (let ((ast nil))
+         (loop
+            :until (string= (elt tokens (- (length tokens) 1)) +token-right-paren+)
+            :do (push (read-from-tokens tokens) ast))
+         (vector-pop tokens) ; pop off ")"
+         (reverse ast)))
+      (t token))))
+
+(defun parse (code)
+  (read-from-tokens (list-to-vector (tokenize code))))
+
+(defun list-to-vector (list)
+  "Converts a list to a fill-pointer vector
+Unfortunately, (coerce list 'vector) doesn't do that."
+  (let ((vector (make-array 0 :fill-pointer 0)))
+    (loop
+       :for item in list
+       :do (vector-push-extend item vector))
+    vector))
