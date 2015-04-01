@@ -39,7 +39,7 @@
 
          ;; atom
          (t
-          (let* ((end (cl-ppcre:scan "( |\\))" remaining))
+          (let* ((end (cl-ppcre:scan "( |\\)|$)" remaining))
                  (atom (subseq remaining 0 end)))
             (setf remaining (subseq remaining end))
             (push atom tokens)))))))
