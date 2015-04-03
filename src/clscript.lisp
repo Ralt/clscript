@@ -76,7 +76,7 @@ Unfortunately, (coerce list 'vector) doesn't do that."
                           (concatenate 'string (get-last forms) " " token))))
                  (t (if (= counter 0)
                         (if forms
-                            (setf (get-last forms)
+                            (setf forms
                                   (append forms (list token)))
                             (setf forms (list token)))
                         (setf (get-last forms)

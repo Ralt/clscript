@@ -25,4 +25,5 @@
 (is (clscript::get-forms "(defun foo (a) (let ((bar (ash a 1))) (when a bar))) (foo 1) bar (baz)")
     '("( defun foo ( a ) ( let ( ( bar ( ash a 1 ) ) ) ( when a bar ) ) )"
       "( foo 1 )"
-      "bar"))
+      "bar"
+      "( baz )"))
