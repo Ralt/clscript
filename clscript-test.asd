@@ -7,5 +7,4 @@
   :components ((:module "tests"
                         :components
                         ((:file "package")
-                         (:test-file "tokenize")
-                         (:test-file "parse")))))
+                         (:test-file "tokenize")))))
