@@ -12,7 +12,7 @@
     (loop
        :do
        (cond
-         ((= (length remaining) 0) (return-from tokenize tokens))
+         ((= (length remaining) 0) (return-from tokenize (reverse tokens)))
 
          ;; new expression
          ((string= +token-left-paren+ (subseq remaining 0 1))
@@ -44,21 +44,6 @@
             (setf remaining (subseq remaining end))
             (push atom tokens)))))))
 
-(defun read-from-tokens (tokens)
-  (let ((token (vector-pop tokens)))
-    (cond
-      ((string= token +token-left-paren+)
-       (let ((ast nil))
-         (loop
-            :until (string= (elt tokens (- (length tokens) 1)) +token-right-paren+)
-            :do (push (read-from-tokens tokens) ast))
-         (vector-pop tokens) ; pop off ")"
-         (reverse ast)))
-      (t token))))
-
-(defun parse (code)
-  (read-from-tokens (list-to-vector (tokenize code))))
-
 (defun list-to-vector (list)
   "Converts a list to a fill-pointer vector
 Unfortunately, (coerce list 'vector) doesn't do that."
@@ -67,3 +52,38 @@ Unfortunately, (coerce list 'vector) doesn't do that."
        :for item in list
        :do (vector-push-extend item vector))
     vector))
+
+(defmacro get-last (list)
+  `(elt ,list (- (length ,list) 1)))
+
+(defun get-forms (code)
+  (let ((tokens (tokenize code))
+        (forms nil)
+        (counter 0))
+    (loop
+       :for token in tokens
+       :do (cond ((string= token +token-left-paren+)
+                  (progn
+                    (incf counter)
+                    (if (= counter 1)
+                        (setf forms (append forms (list token)))
+                        (setf (get-last forms)
+                              (concatenate 'string (get-last forms) " " token)))))
+                 ((string= token +token-right-paren+)
+                  (progn
+                    (decf counter)
+                    (setf (get-last forms)
+                          (concatenate 'string (get-last forms) " " token))))
+                 (t (progn
+                      (setf (get-last forms)
+                            (concatenate 'string (get-last forms) " " token))))))
+    forms))
+
+(defun transpile (code)
+  (let ((forms (mapcar #'(lambda (form)
+                           (sb-cltl2:macroexpand-all (read-from-string form)))
+                       (get-forms code))))
+    (mapcar #'lisp-to-js forms)))
+
+(defun lisp-to-js (forms)
+  forms)

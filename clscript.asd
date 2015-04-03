@@ -3,7 +3,7 @@
   :author "Florian Margaine <florian@margaine.com>"
   :license "MIT License"
   :serial t
-  :depends-on (:cl-ppcre)
+  :depends-on (:cl-ppcre :sb-cltl2)
   :in-order-to ((asdf:test-op (asdf:test-op :clscript-test)))
   :components ((:module "src"
                         :components
