@@ -9,4 +9,5 @@
                         :components
                         ((:file "package")
                          (:file "forms")
+                         (:file "transpilers")
                          (:file "clscript")))))

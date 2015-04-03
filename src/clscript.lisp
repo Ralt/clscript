@@ -5,7 +5,7 @@
   (let ((forms (mapcar #'(lambda (form)
                            (sb-cltl2:macroexpand-all (read-from-string form)))
                        (get-forms code))))
-    (mapcar #'lisp-to-js forms)))
+    (mapcar #'transpile-form forms)))
 
-(defun lisp-to-js (form)
+(defun transpile-form (form)
   form)
