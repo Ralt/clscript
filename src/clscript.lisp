@@ -74,9 +74,13 @@ Unfortunately, (coerce list 'vector) doesn't do that."
                     (decf counter)
                     (setf (get-last forms)
                           (concatenate 'string (get-last forms) " " token))))
-                 (t (progn
-                      (setf (get-last forms)
-                            (concatenate 'string (get-last forms) " " token))))))
+                 (t (if (= counter 0)
+                        (if forms
+                            (setf (get-last forms)
+                                  (append forms (list token)))
+                            (setf forms (list token)))
+                        (setf (get-last forms)
+                              (concatenate 'string (get-last forms) " " token))))))
     forms))
 
 (defun transpile (code)
