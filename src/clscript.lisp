@@ -8,4 +8,7 @@
     (mapcar #'transpile-form forms)))
 
 (defun transpile-form (form)
-  form)
+  (let ((transpiler (get-transpiler form)))
+    (if transpiler
+        (funcall transpiler form)
+        (default-transpiler form))))
