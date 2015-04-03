@@ -1,6 +1,8 @@
 (in-package #:clscript-test)
 
 
+(plan 8)
+
 (is (clscript::get-forms "(foo \"foo\" \"bar\" 1)")
     '("( foo \"foo\" \"bar\" 1 )"))
 
@@ -27,3 +29,5 @@
       "( foo 1 )"
       "bar"
       "( baz )"))
+
+(finalize)

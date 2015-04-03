@@ -8,4 +8,5 @@
   :components ((:module "src"
                         :components
                         ((:file "package")
+                         (:file "forms")
                          (:file "clscript")))))
