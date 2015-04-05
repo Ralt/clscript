@@ -13,10 +13,16 @@ It's just a basic (foo bar) -> foo(bar) transpiler."
       (gethash (first form) *transpilers*)
     (when presentp transpiler)))
 
+(defun transpile-atom (atom)
+  "Transpiles a single atom.
+Many atoms are replaceable without change, but a lot also need replacement,
+like the gensym-generated variables."
+  (format nil "~S" atom))
+
 (defmacro define-transpiler (name args &body body)
-  `(setf (gethash ,(symbol-name name) *transpilers*)
+  `(setf (gethash ,(string-upcase name) *transpilers*)
          #'(lambda ,args
              ,@body)))
 
-(define-transpiler progn (form)
-  form)
+(define-transpiler "progn" (form)
+  (mapcar #'transpile-form (rest form)))
