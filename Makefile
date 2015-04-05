@@ -10,4 +10,4 @@ test:
 		--quit
 
 docker-test:
-	docker run -v $(PWD):/root/common-lisp/clscript -w /root/common-lisp/clscript -ti dparnell/sbcl-1.2.5 make test
+	docker run -v $(PWD):/root/common-lisp/clscript -w /root/common-lisp/clscript -t dparnell/sbcl-1.2.5 make test
