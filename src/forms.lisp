@@ -1,6 +1,10 @@
 (in-package #:clscript)
 
 
+(define-constant +token-left-paren+ "(" :test #'equal)
+(define-constant +token-right-paren+ ")" :test #'equal)
+(define-constant +token-double-quote+ "\"" :test #'equal)
+
 (defun tokenize (string)
   (let ((remaining string)
         (tokens nil))
