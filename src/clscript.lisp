@@ -1,6 +1,19 @@
 (in-package #:clscript)
 
 
+(defun main (args)
+  (declare (ignore args))
+  (format t "~A" (transpile (read-stdin))))
+
+(defun read-stdin ()
+  (with-output-to-string (ret)
+    (with-open-stream (s *standard-input*)
+      (loop
+         :for line = (read-line s nil)
+         :while line
+         :do (write-string line ret)))
+    ret))
+
 (defun transpile (code)
   (format
    nil
