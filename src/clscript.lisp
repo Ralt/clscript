@@ -2,10 +2,14 @@
 
 
 (defun transpile (code)
-  (let ((forms (mapcar #'(lambda (form)
-                           (sb-cltl2:macroexpand-all (read-from-string form)))
-                       (get-forms code))))
-    (mapcar #'transpile-form forms)))
+  (format
+   nil
+   "~{~A~%~}"
+   (alexandria:flatten
+    (mapcar #'transpile-form
+            (mapcar #'(lambda (form)
+                        (sb-cltl2:macroexpand-all (read-from-string form)))
+                    (get-forms code))))))
 
 (defun transpile-form (form)
   ;; when it's not a list, then just return it.
