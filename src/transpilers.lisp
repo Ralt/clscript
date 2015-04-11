@@ -30,7 +30,7 @@ like the gensym-generated variables."
              ,@body)))
 
 (define-transpiler "common-lisp:progn" (form)
-  (mapcar #'transpile-form (rest form)))
+  (remove nil (mapcar #'transpile-form (rest form))))
 
 (define-transpiler "common-lisp:eval-when" (form)
   "Voluntarily do nothing"
