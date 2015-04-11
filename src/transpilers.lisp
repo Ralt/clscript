@@ -11,9 +11,12 @@ It's just a basic (foo bar) -> foo(bar) transpiler."
           (mapcar #'transpile-form (rest form))))
 
 (defun get-transpiler (form)
-  (multiple-value-bind (transpiler presentp)
-      (gethash (symbol-name (first form)) *transpilers*)
-    (when presentp transpiler)))
+  (let* ((first-symbol (first form))
+         (symbol-package (package-name (symbol-package first-symbol)))
+         (symbol-name (symbol-name first-symbol)))
+    (multiple-value-bind (transpiler presentp)
+              (gethash (concatenate 'string symbol-package ":" symbol-name) *transpilers*)
+            (when presentp transpiler))))
 
 (defun transpile-atom (atom)
   "Transpiles a single atom.
@@ -26,5 +29,20 @@ like the gensym-generated variables."
          #'(lambda ,args
              ,@body)))
 
-(define-transpiler "progn" (form)
+(define-transpiler "common-lisp:progn" (form)
   (mapcar #'transpile-form (rest form)))
+
+(define-transpiler "common-lisp:eval-when" (form)
+  "Voluntarily do nothing"
+  (declare (ignore form)))
+
+(define-transpiler "sb-impl:%defun" (form)
+  (format nil "function ~A(~{~A~^, ~}) {~%~A~%}"
+          (string-downcase (symbol-name (second (third form))))
+          (mapcar #'string-downcase (third (third form)))
+          (transpile-form (third (fourth (third form))))))
+
+(define-transpiler "common-lisp:block" (form)
+  (format nil "~A:~% ~A"
+          (string-downcase (second form))
+          (transpile-form (third form))))

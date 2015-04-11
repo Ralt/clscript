@@ -8,4 +8,5 @@
                         :components
                         ((:file "package")
                          (:test-file "tokenize")
-                         (:test-file "get-forms")))))
+                         (:test-file "get-forms")
+                         (:test-file "transpilers")))))
