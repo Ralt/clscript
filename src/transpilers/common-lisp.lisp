@@ -10,8 +10,8 @@ It's just a basic (foo bar) -> foo(bar) transpiler."
 (define-transpiler "common-lisp:progn" (form)
   (remove nil (mapcar #'transpile-form (rest form))))
 
+;;; Voluntarily do nothing
 (define-transpiler "common-lisp:eval-when" (form)
-  "Voluntarily do nothing"
   (declare (ignore form)))
 
 (define-transpiler "common-lisp:block" (form)
@@ -20,11 +20,22 @@ It's just a basic (foo bar) -> foo(bar) transpiler."
                               nil
                               (third form))))
 
+;;; Returning a function is required to support things like:
+;;; (defun foo ()
+;;;   (setf *bar* (if t
+;;;                   1
+;;;                   2)))
 (define-transpiler "common-lisp:if" (form)
   (format nil "(function() {~%if (~A) {~%~A~%} else {~%~A~%}~%}());"
           (transpile-form (second form))
-          (transpile-function-body (third form))
-          (transpile-function-body (fourth form))))
+          (transpile-function-body (if (and (eq (type-of (third form)) 'cons)
+                                            (eq (first (third form)) 'progn))
+                                       (rest (third form))
+                                       (third form)))
+          (transpile-function-body (if (and (eq (type-of (third form)) 'cons)
+                                            (eq (first (fourth form)) 'progn))
+                                       (rest (fourth form))
+                                       (fourth form)))))
 
 (defun transpile-atom (atom)
   (cond
@@ -36,9 +47,12 @@ It's just a basic (foo bar) -> foo(bar) transpiler."
   (format nil "function ~A(~{~A~^, ~}) {~%~A~%}"
           name args (transpile-function-body body)))
 
+(defun transpile-lambda (args body)
+  (format nil "function(~{~A~^, ~}) {~%~A~%}"
+          args (transpile-function-body body)))
+
 (defun transpile-function-body (forms)
-  (cond ((eq (type-of forms) 'symbol)
-         (transpile-return-form forms))
+  (cond ((eq (type-of forms) 'symbol) (transpile-return-form forms))
         (t (let ((reversed-body (reverse forms)))
              (format nil "~{~A;~%~}~A"
                      (mapcar #'transpile-form (reverse (rest reversed-body)))
