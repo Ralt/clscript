@@ -10,7 +10,7 @@
        (is (funcall (clscript::get-transpiler ,forms-var) ,forms-var)
            ,code))))
 
-(plan 9)
+(plan 10)
 
 (test-transpilation
  "(progn (foo 1) (bar))"
@@ -72,6 +72,14 @@ return null;
  "(function() {
 var foo = 1;
 return foo;
+}());")
+
+(test-transpilation
+ "(let ((foo (bar 1)) (baz 2)) (qux foo))"
+ "(function() {
+var foo = bar(1);
+var baz = 2;
+return qux(foo);
 }());")
 
 (finalize)
