@@ -6,7 +6,7 @@
 (defun default-transpiler (form)
   "Called when no transpiler exists.
 It's just a basic (foo bar) -> foo(bar) transpiler."
-  (format nil "~A(~{~S~^, ~});"
+  (format nil "~A(~{~S~^, ~})"
           (string-downcase (first form))
           (mapcar #'transpile-form (rest form))))
 
@@ -19,10 +19,8 @@ It's just a basic (foo bar) -> foo(bar) transpiler."
             (when presentp transpiler))))
 
 (defun transpile-atom (atom)
-  "Transpiles a single atom.
-Many atoms are replaceable without change, but a lot also need replacement,
-like the gensym-generated variables."
-  atom)
+  (cond ((eq (type-of atom) 'symbol) (string-downcase (symbol-name atom)))
+        (t atom)))
 
 (defmacro define-transpiler (name args &body body)
   `(setf (gethash ,(string-upcase name) *transpilers*)
@@ -37,12 +35,27 @@ like the gensym-generated variables."
   (declare (ignore form)))
 
 (define-transpiler "sb-impl:%defun" (form)
+  (transpile-function (string-downcase (symbol-name (second (third form))))
+                      (mapcar #'string-downcase (third (third form)))
+                      (rest (rest (fourth (third form))))))
+
+(defun transpile-function (name args body)
   (format nil "function ~A(~{~A~^, ~}) {~%~A~%}"
-          (string-downcase (symbol-name (second (third form))))
-          (mapcar #'string-downcase (third (third form)))
-          (transpile-form (third (fourth (third form))))))
+          name args (transpile-function-body body)))
+
+(defun transpile-function-body (forms)
+  (cond ((eq (type-of forms) 'symbol)
+         (transpile-return-form forms))
+        (t (let ((reversed-body (reverse forms)))
+             (format nil "~{~A;~%~}~A"
+                     (mapcar #'transpile-form (reverse (rest reversed-body)))
+                     (transpile-return-form (first reversed-body)))))))
+
+(defun transpile-return-form (form)
+  (format nil "return ~A;" (transpile-form form)))
 
 (define-transpiler "common-lisp:block" (form)
-  (format nil "~A:~% ~A"
-          (string-downcase (second form))
-          (transpile-form (third form))))
+  (format nil "(~A());"
+          (transpile-function (string-downcase (second form))
+                              nil
+                              (third form))))
