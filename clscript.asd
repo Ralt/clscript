@@ -10,4 +10,6 @@
                         ((:file "package")
                          (:file "forms")
                          (:file "transpilers")
+                         (:file "transpilers/sbcl")
+                         (:file "transpilers/common-lisp")
                          (:file "clscript")))))
