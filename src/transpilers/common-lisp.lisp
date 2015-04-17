@@ -7,10 +7,6 @@ It's just a basic (foo bar) -> foo(bar) transpiler."
           (string-downcase (first form))
           (mapcar #'transpile-form (rest form))))
 
-(defun transpile-atom (atom)
-  (cond ((eq (type-of atom) 'symbol) (string-downcase (symbol-name atom)))
-        (t atom)))
-
 (define-transpiler "common-lisp:progn" (form)
   (remove nil (mapcar #'transpile-form (rest form))))
 
@@ -18,6 +14,23 @@ It's just a basic (foo bar) -> foo(bar) transpiler."
   "Voluntarily do nothing"
   (declare (ignore form)))
 
+(define-transpiler "common-lisp:block" (form)
+  (format nil "(~A());"
+          (transpile-function (string-downcase (second form))
+                              nil
+                              (third form))))
+
+(define-transpiler "common-lisp:if" (form)
+  (format nil "(function() {~%if (~A) {~%~A~%} else {~%~A~%}~%}());"
+          (transpile-form (second form))
+          (transpile-function-body (third form))
+          (transpile-function-body (fourth form))))
+
+(defun transpile-atom (atom)
+  (cond
+    ((eq atom nil) "null")
+    ((eq (type-of atom) 'symbol) (string-downcase (symbol-name atom)))
+    (t atom)))
 
 (defun transpile-function (name args body)
   (format nil "function ~A(~{~A~^, ~}) {~%~A~%}"
@@ -33,9 +46,3 @@ It's just a basic (foo bar) -> foo(bar) transpiler."
 
 (defun transpile-return-form (form)
   (format nil "return ~A;" (transpile-form form)))
-
-(define-transpiler "common-lisp:block" (form)
-  (format nil "(~A());"
-          (transpile-function (string-downcase (second form))
-                              nil
-                              (third form))))

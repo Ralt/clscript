@@ -10,7 +10,7 @@
        (is (funcall (clscript::get-transpiler ,forms-var) ,forms-var)
            ,code))))
 
-(plan 6)
+(plan 8)
 
 (test-transpilation
  "(progn (foo 1) (bar))"
@@ -46,5 +46,25 @@ return bar;
  '("function foo(a, b) {
 return foo(bar(a), b);
 }"))
+
+(test-transpilation
+ "(if foo bar)"
+ "(function() {
+if (foo) {
+return bar;
+} else {
+return null;
+}
+}());")
+
+(test-transpilation
+ "(when (foo 1) (bar (baz 2)))"
+ "(function() {
+if (foo(1)) {
+return bar(baz(2));
+} else {
+return null;
+}
+}());")
 
 (finalize)
