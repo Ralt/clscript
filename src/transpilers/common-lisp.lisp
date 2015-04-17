@@ -32,7 +32,7 @@ It's just a basic (foo bar) -> foo(bar) transpiler."
                                             (eq (first (third form)) 'progn))
                                        (rest (third form))
                                        (third form)))
-          (transpile-function-body (if (and (eq (type-of (third form)) 'cons)
+          (transpile-function-body (if (and (eq (type-of (fourth form)) 'cons)
                                             (eq (first (fourth form)) 'progn))
                                        (rest (fourth form))
                                        (fourth form)))))
