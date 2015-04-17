@@ -37,6 +37,19 @@ It's just a basic (foo bar) -> foo(bar) transpiler."
                                        (rest (fourth form))
                                        (fourth form)))))
 
+(define-transpiler "common-lisp:let" (form)
+  (format nil "(function() {~%~{~A;~^~%~}~%~A~%}());"
+          (transpile-let (second form))
+          (transpile-function-body (rest (rest form)))))
+
+(defun transpile-let (declarations)
+  (mapcar #'transpile-declaration declarations))
+
+(defun transpile-declaration (declaration)
+  (format nil "var ~A = ~A"
+          (transpile-atom (first declaration))
+          (transpile-form (second declaration))))
+
 (defun transpile-atom (atom)
   (cond
     ((eq atom nil) "null")
